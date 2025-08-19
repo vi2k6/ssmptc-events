@@ -112,7 +112,7 @@
               <button id="logout-btn" class="px-3 py-2 rounded-xl glass">Logout</button>
             </div>
           </div>
-          <div id="dashboard-content" class="grid gap-4 md:grid-cols-2 hidden">
+          <div class="grid gap-4 md:grid-cols-2">
             <div class="glass rounded-2xl p-4">
               <h3 class="font-semibold mb-2">Events</h3>
               <div class="flex gap-2 mb-2">
@@ -131,9 +131,7 @@
             </div>
             <div class="glass rounded-2xl p-4 md:col-span-2">
               <h3 class="font-semibold mb-2">Registrations</h3>
-              <div class="flex gap-2 mb-2">
-                <button id="reg-refresh" class="px-3 py-2 rounded-xl glass">Refresh</button>
-              </div>
+              <button id="reg-refresh" class="px-3 py-2 rounded-xl glass mb-2">Refresh</button>
               <div id="reg-list" class="space-y-2 max-h-80 overflow-auto"></div>
             </div>
             <div id="owner-panel" class="glass rounded-2xl p-4 md:col-span-2 hidden">
@@ -145,9 +143,6 @@
               </div>
               <div id="admins-list" class="space-y-2"></div>
             </div>
-          </div>
-          <div id="login-prompt" class="text-center text-slate-400 py-8">
-            Please login to access the dashboard
           </div>
         </div>
       </div>
@@ -180,4 +175,4 @@
 
   <script src="app.js"></script>
 </body>
-</html>
+                                         </html>
