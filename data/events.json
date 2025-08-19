@@ -1,0 +1,26 @@
+[
+  {
+    "id": "evt1",
+    "title": "Tech Fest 2025",
+    "description": "Annual campus technology festival.",
+    "image": "assets/techfest.jpg",
+    "startTime": "2025-09-10T09:00:00.000Z",
+    "endTime": "2025-09-12T18:00:00.000Z"
+  },
+  {
+    "id": "evt2",
+    "title": "Innovation Day",
+    "description": "Showcase of student projects.",
+    "image": "assets/innovation.jpg",
+    "startTime": "2025-08-16T09:00:00.000Z",
+    "endTime": "2025-08-18T17:00:00.000Z"
+  },
+  {
+    "id": "evt3",
+    "title": "Alumni Meet 2024",
+    "description": "Reunite and network with alumni.",
+    "image": "assets/alumni.jpg",
+    "startTime": "2024-12-05T10:00:00.000Z",
+    "endTime": "2024-12-05T16:00:00.000Z"
+  }
+]

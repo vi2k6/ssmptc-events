@@ -1,0 +1,46 @@
+[
+  {
+    "id": "prg1",
+    "eventId": "evt1",
+    "title": "Hackathon",
+    "description": "24-hour coding challenge.",
+    "type": "group",
+    "regStart": "2025-08-25T00:00:00.000Z",
+    "regEnd": "2025-09-08T23:59:59.000Z",
+    "departments": [
+      "CSE",
+      "ECE",
+      "EEE",
+      "IT"
+    ],
+    "time": "2025-09-11T09:00:00.000Z"
+  },
+  {
+    "id": "prg2",
+    "eventId": "evt1",
+    "title": "Circuit Design",
+    "description": "Design and simulate circuits.",
+    "type": "individual",
+    "regStart": "2025-08-20T00:00:00.000Z",
+    "regEnd": "2025-09-09T23:59:59.000Z",
+    "departments": [
+      "ECE",
+      "EEE",
+      "ME"
+    ],
+    "time": "2025-09-12T10:00:00.000Z"
+  },
+  {
+    "id": "prg3",
+    "eventId": "evt2",
+    "title": "Project Expo",
+    "description": "Display your innovations.",
+    "type": "group",
+    "regStart": "2025-08-01T00:00:00.000Z",
+    "regEnd": "2025-08-17T23:59:59.000Z",
+    "departments": [
+      "ALL"
+    ],
+    "time": "2025-08-18T09:00:00.000Z"
+  }
+]
