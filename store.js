@@ -1,17 +1,19 @@
 import { MongoClient } from 'mongodb';
+import fs from 'fs';
+import path from 'path';
 
 let client;
-let db;
+let mongoDB;  // renamed to avoid conflict
 
 async function connectDB() {
   if (!client) {
     const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ssmptc-events';
     client = new MongoClient(uri);
     await client.connect();
-    db = client.db();
+    mongoDB = client.db();
     console.log('Connected to MongoDB');
   }
-  return db;
+  return mongoDB;
 }
 
 export const dbMongo = {
@@ -69,9 +71,7 @@ export const dbMongo = {
   }
 };
 
-// Keep file-based storage as fallback
-import fs from 'fs';
-import path from 'path';
+// ---------- FILE STORAGE FALLBACK ----------
 const DATA_DIR = path.resolve('data');
 
 function readJSON(file){
@@ -98,5 +98,5 @@ export const dbFile = {
   writeRegistrations: (v)=> writeJSON('registrations.json', v),
 };
 
-// Use MongoDB if available, fallback to file storage
+// ✅ Final export: choose Mongo if available
 export const db = process.env.MONGODB_URI ? dbMongo : dbFile;
