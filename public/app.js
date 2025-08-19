@@ -2,7 +2,6 @@ const $ = (q)=> document.querySelector(q);
 const $$ = (q)=> Array.from(document.querySelectorAll(q));
 let token = null;
 let role = null;
-let userId = null;
 let selectedEventId = null;
 let regProgramId = null;
 
@@ -190,105 +189,33 @@ async function login(){
   const roleSel = $("#login-role").value;
   const id = $("#login-id").value.trim();
   const password = $("#login-pw").value.trim();
-  
-  if(!id || !password) {
-    showError("#login-msg", "Please enter both ID and password");
-    return;
-  }
-  
-  $("#login-msg").textContent = "Logging in...";
-  $("#login-btn").disabled = true;
-  
   const res = await fetch('/api/login', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({role: roleSel, id, password})
   });
   const data = await res.json();
-  
-  $("#login-btn").disabled = false;
-  
-  if(!res.ok){ 
-    showError("#login-msg", data.error || 'Login failed'); 
-    return; 
-  }
-  
-  token = data.token; 
-  role = data.role;
-  userId = data.id;
-  
-  // Clear login form
-  $("#login-id").value = '';
-  $("#login-pw").value = '';
-  $("#login-msg").textContent = '';
-  
-  // Show user info and dashboard
+  if(!res.ok){ $("#login-msg").textContent = data.error || 'Login failed'; return; }
+  token = data.token; role = data.role;
   $("#user-badge").textContent = `${role.toUpperCase()}: ${id}`;
-  $("#dashboard-content").classList.remove('hidden');
   $("#owner-panel").classList.toggle('hidden', role!=='owner');
-  
-  // Load dashboard data
   await refreshEvents();
   await refreshRegs();
   if(role==='owner'){ await ownerLoadAdmins(); }
-  
-  showSuccess("#login-msg", "Login successful!");
-  setTimeout(() => $("#login-msg").textContent = '', 2000);
 }
 
 function logout(){
-  token = null; 
-  role = null; 
-  userId = null;
-  selectedEventId = null;
-  
+  token = null; role = null; selectedEventId = null;
   $("#user-badge").textContent = '';
-  $("#dashboard-content").classList.add('hidden');
   $("#owner-panel").classList.add('hidden');
   $("#ev-list").innerHTML = '';
   $("#prg-list").innerHTML = '';
   $("#reg-list").innerHTML = '';
-  $("#admins-list").innerHTML = '';
-  
-  showSuccess("#login-msg", "Logged out successfully");
-  setTimeout(() => $("#login-msg").textContent = '', 2000);
-}
-
-// Helper functions for showing messages
-function showError(selector, message) {
-  const el = $(selector);
-  el.textContent = message;
-  el.className = 'text-sm mt-2 text-red-400';
-}
-
-function showSuccess(selector, message) {
-  const el = $(selector);
-  el.textContent = message;
-  el.className = 'text-sm mt-2 text-green-400';
-}
-
-function showMessage(selector, message, isError = false) {
-  const el = $(selector);
-  el.textContent = message;
-  el.className = `text-sm mt-2 ${isError ? 'text-red-400' : 'text-green-400'}`;
-  setTimeout(() => el.textContent = '', 3000);
 }
 
 async function refreshEvents(){
-  if(!token) return;
-  
   const res = await fetch('/api/admin/events', { headers:{Authorization: 'Bearer '+token} });
-  if(!res.ok) {
-    showMessage("#ev-list", "Failed to load events", true);
-    return;
-  }
   const events = await res.json();
   const list = $("#ev-list"); list.innerHTML = '';
-  
-  if(!events.length) {
-    list.innerHTML = '<p class="text-slate-400 text-sm">No events found</p>';
-    return;
-  }
-  
   events.forEach(ev=>{
     const item = document.createElement('div');
     item.className = 'glass rounded-xl p-3 flex items-center justify-between';
@@ -313,47 +240,22 @@ async function refreshEvents(){
       const startTime = prompt('Start ISO', ev.startTime) || ev.startTime;
       const endTime = prompt('End ISO', ev.endTime) || ev.endTime;
       const res2 = await fetch('/api/admin/events/'+ev.id, { method:'PUT', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({title, description, image, startTime, endTime}) });
-      if(!res2.ok) {
-        showMessage("#ev-list", "Update failed", true);
-      } else {
-        refreshEvents();
-        showMessage("#ev-list", "Event updated successfully");
-      }
+      if(!res2.ok) alert('Update failed'); else refreshEvents();
     });
     item.querySelector('[data-act="del"]').addEventListener('click', async ()=>{
       if(!confirm('Delete event?')) return;
       const res2 = await fetch('/api/admin/events/'+ev.id, { method:'DELETE', headers:{Authorization:'Bearer '+token} });
-      if(!res2.ok) {
-        showMessage("#ev-list", "Delete failed", true);
-      } else {
-        refreshEvents();
-        showMessage("#ev-list", "Event deleted successfully");
-      }
+      if(!res2.ok) alert('Delete failed'); else refreshEvents();
     });
     list.appendChild(item);
   });
 }
 
 async function refreshPrograms(){
-  if(!token) return;
-  if(!selectedEventId){ 
-    $("#prg-list").innerHTML = '<p class="text-slate-400 text-sm">Select an event first</p>'; 
-    return; 
-  }
-  
+  if(!selectedEventId){ $("#prg-list").innerHTML = '<p class="text-sm">Select an event first</p>'; return; }
   const res = await fetch(`/api/admin/events/${selectedEventId}/programs`, { headers:{Authorization:'Bearer '+token} });
-  if(!res.ok) {
-    showMessage("#prg-list", "Failed to load programs", true);
-    return;
-  }
   const prgs = await res.json();
   const list = $("#prg-list"); list.innerHTML = '';
-  
-  if(!prgs.length) {
-    list.innerHTML = '<p class="text-slate-400 text-sm">No programs found for this event</p>';
-    return;
-  }
-  
   prgs.forEach(p=>{
     const item = document.createElement('div');
     item.className = 'glass rounded-xl p-3 flex items-center justify-between';
@@ -377,43 +279,21 @@ async function refreshPrograms(){
       const departments = (prompt('Departments (comma separated)', p.departments.join(',')) || p.departments.join(',')).split(',').map(s=> s.trim());
       const time = prompt('Program Time ISO', p.time) || p.time;
       const res2 = await fetch('/api/admin/programs/'+p.id, { method:'PUT', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({title, description, type, regStart, regEnd, departments, time}) });
-      if(!res2.ok) {
-        showMessage("#prg-list", "Update failed", true);
-      } else {
-        refreshPrograms();
-        showMessage("#prg-list", "Program updated successfully");
-      }
+      if(!res2.ok) alert('Update failed'); else refreshPrograms();
     });
     item.querySelector('[data-act="del"]').addEventListener('click', async ()=>{
       if(!confirm('Delete program?')) return;
       const res2 = await fetch('/api/admin/programs/'+p.id, { method:'DELETE', headers:{Authorization:'Bearer '+token} });
-      if(!res2.ok) {
-        showMessage("#prg-list", "Delete failed", true);
-      } else {
-        refreshPrograms();
-        showMessage("#prg-list", "Program deleted successfully");
-      }
+      if(!res2.ok) alert('Delete failed'); else refreshPrograms();
     });
     list.appendChild(item);
   });
 }
 
 async function refreshRegs(){
-  if(!token) return;
-  
   const res = await fetch('/api/admin/registrations', { headers:{Authorization:'Bearer '+token} });
-  if(!res.ok) {
-    showMessage("#reg-list", "Failed to load registrations", true);
-    return;
-  }
   const regs = await res.json();
   const list = $("#reg-list"); list.innerHTML='';
-  
-  if(!regs.length) {
-    list.innerHTML = '<p class="text-slate-400 text-sm">No registrations found</p>';
-    return;
-  }
-  
   regs.forEach(r=>{
     const item = document.createElement('div');
     item.className = 'glass rounded-xl p-3 flex items-center justify-between';
@@ -432,22 +312,12 @@ async function refreshRegs(){
       const department = prompt('Department', r.department) || r.department;
       const semester = prompt('Semester (1-6)', r.semester) || r.semester;
       const res2 = await fetch('/api/admin/registrations/'+r.id, { method:'PUT', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({name, department, semester}) });
-      if(!res2.ok) {
-        showMessage("#reg-list", "Update failed", true);
-      } else {
-        refreshRegs();
-        showMessage("#reg-list", "Registration updated successfully");
-      }
+      if(!res2.ok) alert('Update failed'); else refreshRegs();
     });
     item.querySelector('[data-act="del"]').addEventListener('click', async ()=>{
       if(!confirm('Delete registration?')) return;
       const res2 = await fetch('/api/admin/registrations/'+r.id, { method:'DELETE', headers:{Authorization:'Bearer '+token} });
-      if(!res2.ok) {
-        showMessage("#reg-list", "Delete failed", true);
-      } else {
-        refreshRegs();
-        showMessage("#reg-list", "Registration deleted successfully");
-      }
+      if(!res2.ok) alert('Delete failed'); else refreshRegs();
     });
     list.appendChild(item);
   });
@@ -455,21 +325,9 @@ async function refreshRegs(){
 
 // Owner admin management
 async function ownerLoadAdmins(){
-  if(!token || role !== 'owner') return;
-  
   const res = await fetch('/api/owner/admins', { headers:{Authorization:'Bearer '+token} });
-  if(!res.ok) {
-    showMessage("#admins-list", "Failed to load admins", true);
-    return;
-  }
   const admins = await res.json();
   const list = $("#admins-list"); list.innerHTML='';
-  
-  if(!admins.length) {
-    list.innerHTML = '<p class="text-slate-400 text-sm">No admins found</p>';
-    return;
-  }
-  
   admins.forEach(a=>{
     const row = document.createElement('div');
     row.className = 'glass rounded-xl p-3 flex items-center justify-between';
@@ -483,22 +341,12 @@ async function ownerLoadAdmins(){
     row.querySelector('[data-act="edit"]').addEventListener('click', async ()=>{
       const password = prompt('New password for '+a.id, a.password) || a.password;
       const res2 = await fetch('/api/owner/admins/'+a.id, { method:'PUT', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({password}) });
-      if(!res2.ok) {
-        showMessage("#admins-list", "Update failed", true);
-      } else {
-        ownerLoadAdmins();
-        showMessage("#admins-list", "Admin updated successfully");
-      }
+      if(!res2.ok) alert('Update failed'); else ownerLoadAdmins();
     });
     row.querySelector('[data-act="del"]').addEventListener('click', async ()=>{
       if(!confirm('Delete admin '+a.id+'?')) return;
       const res2 = await fetch('/api/owner/admins/'+a.id, { method:'DELETE', headers:{Authorization:'Bearer '+token} });
-      if(!res2.ok) {
-        showMessage("#admins-list", "Delete failed", true);
-      } else {
-        ownerLoadAdmins();
-        showMessage("#admins-list", "Admin deleted successfully");
-      }
+      if(!res2.ok) alert('Delete failed'); else ownerLoadAdmins();
     });
     list.appendChild(row);
   });
@@ -507,18 +355,10 @@ async function ownerLoadAdmins(){
 async function ownerCreateAdmin(){
   const id = $("#new-admin-id").value.trim();
   const password = $("#new-admin-pw").value.trim();
-  if(!id || !password) {
-    showMessage("#admins-list", "Enter ID and password", true);
-    return;
-  }
+  if(!id || !password) return alert('Enter ID and password');
   const res = await fetch('/api/owner/admins', { method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({id, password}) });
-  if(!res.ok){ 
-    const d = await res.json(); 
-    showMessage("#admins-list", d.error || 'Failed to create admin', true);
-    return; 
-  }
+  if(!res.ok){ const d = await res.json(); alert(d.error||'Failed'); return; }
   $("#new-admin-id").value = ''; $("#new-admin-pw").value = '';
-  showMessage("#admins-list", "Admin created successfully");
   ownerLoadAdmins();
 }
 
@@ -548,24 +388,13 @@ $("#ev-new").addEventListener('click', async ()=>{
   const image = prompt('Image URL (optional)') || '';
   const startTime = prompt('Start ISO (e.g. 2025-09-10T09:00:00.000Z)');
   const endTime = prompt('End ISO');
-  if(!startTime || !endTime) {
-    showMessage("#ev-list", "Start and end times are required", true);
-    return;
-  }
   const res = await fetch('/api/admin/events', { method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({title, description, image, startTime, endTime}) });
-  if(!res.ok){ 
-    showMessage("#ev-list", "Create failed", true);
-    return; 
-  }
-  showMessage("#ev-list", "Event created successfully");
+  if(!res.ok){ alert('Create failed'); return; }
   refreshEvents();
 });
 $("#prg-refresh").addEventListener('click', refreshPrograms);
 $("#prg-new").addEventListener('click', async ()=>{
-  if(!selectedEventId) {
-    showMessage("#prg-list", "Select an event first", true);
-    return;
-  }
+  if(!selectedEventId) return alert('Select an event first');
   const title = prompt('Program Title'); if(!title) return;
   const description = prompt('Description') || '';
   const type = prompt('Type (individual|group)', 'individual') || 'individual';
@@ -573,19 +402,10 @@ $("#prg-new").addEventListener('click', async ()=>{
   const regEnd = prompt('Reg End ISO');
   const departments = (prompt('Departments (comma, or ALL)', 'ALL')||'ALL').split(',').map(s=> s.trim());
   const time = prompt('Program Time ISO');
-  if(!regStart || !regEnd || !time) {
-    showMessage("#prg-list", "Registration times and program time are required", true);
-    return;
-  }
   const res = await fetch(`/api/admin/events/${selectedEventId}/programs`, { method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({title, description, type, regStart, regEnd, departments, time}) });
-  if(!res.ok){ 
-    showMessage("#prg-list", "Create failed", true);
-    return; 
-  }
-  showMessage("#prg-list", "Program created successfully");
+  if(!res.ok){ alert('Create failed'); return; }
   refreshPrograms();
 });
-$("#reg-refresh").addEventListener('click', refreshRegs);
 $("#admin-create").addEventListener('click', ownerCreateAdmin);
 
 // Auto-init
