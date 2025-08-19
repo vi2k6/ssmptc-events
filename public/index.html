@@ -1,310 +1,55 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
   <title>SSMPTC Events</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    :root { 
-      --primary-green: #10B981; 
-      --dark-green: #059669; 
-      --light-green: #34D399;
-      --bg-dark: #000000;
-      --card-dark: #111827;
-      --border-dark: #1F2937;
-      --text-gray: #9CA3AF;
-    }
-    body { 
-      font-family: 'Inter', sans-serif; 
-      background: var(--bg-dark);
-      color: white;
-    }
-    .glass { 
-      background: var(--card-dark); 
-      border: 1px solid var(--border-dark); 
-      transition: all 0.3s ease;
-    }
-    .glass:hover { 
-      border-color: var(--primary-green); 
-    }
-    .btn { 
-      transition: all 0.2s ease; 
-      background: var(--card-dark);
-      border: 1px solid var(--border-dark);
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      font-weight: 500;
-    }
-    .btn:hover { 
-      background: var(--border-dark); 
-      border-color: var(--primary-green);
-      transform: translateY(-1px);
-    }
-    .btn-primary {
-      background: var(--primary-green);
-      border-color: var(--primary-green);
-      color: white;
-    }
-    .btn-primary:hover {
-      background: var(--dark-green);
-      border-color: var(--dark-green);
-    }
-    .btn-green {
-      background: #00D084 !important;
-      border-color: #00D084 !important;
-      color: white;
-    }
-    .btn-green:hover {
-      background: #00B574 !important;
-      border-color: #00B574 !important;
-      transform: translateY(-1px);
-    }
-    .btn-primary {
-      background: #00D084 !important;
-      border-color: #00D084 !important;
-      color: white;
-    }
-    .btn-primary:hover {
-      background: #00B574 !important;
-      border-color: #00B574 !important;
-    }
-    .input-field {
-      background: var(--card-dark);
-      border: 1px solid var(--border-dark);
-      color: white;
-      transition: all 0.2s ease;
-    }
-    .input-field:focus {
-      border-color: var(--primary-green);
-      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
-      outline: none;
-    }
-    .badge {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--light-green);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-    }
-    .error-text {
-      color: #EF4444;
-    }
-    .success-text {
-      color: var(--light-green);
-    }
-    .modal-backdrop {
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
-    }
-    .filter-toggle {
-      cursor: pointer;
-    }
-    .filter-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-    }
-    .filter-content.open {
-      max-height: 500px;
-    }
-    @media (max-width: 768px) {
-      .mobile-stack {
-        flex-direction: column;
-      }
-      .mobile-full {
-        width: 100%;
-      }
-    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+    .hidden { display: none; }
+    .section { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
   </style>
 </head>
-<body class="min-h-screen">
-  <header class="sticky top-0 z-20 glass">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-          <span class="text-white font-bold text-sm">S</span>
-        </div>
-        <h1 class="text-xl lg:text-2xl font-bold">SSMPTC Events</h1>
-      </div>
-      <nav class="flex items-center gap-2">
-        <button id="nav-home" class="btn text-sm lg:text-base">Home</button>
-        <button id="nav-myregs" class="btn text-sm lg:text-base">
-          <span class="hidden sm:inline">My Registrations</span>
-          <span class="sm:hidden">My Regs</span>
-        </button>
-        <button id="nav-login" class="btn text-sm lg:text-base">
-          <span class="hidden sm:inline">Login/Dashboard</span>
-          <span class="sm:hidden">Login</span>
-        </button>
-      </nav>
-    </div>
-  </header>
+<body>
+  <h1>SSMPTC Events</h1>
 
-  <main class="max-w-7xl mx-auto px-4 py-6 lg:py-8">
-    <!-- FILTER TOGGLE -->
-    <section id="filter-section" class="mb-6">
-      <div class="glass rounded-xl p-4">
-        <div class="filter-toggle flex items-center justify-between" id="filter-toggle">
-          <h3 class="text-lg font-semibold">Filters</h3>
-          <svg class="w-5 h-5 transform transition-transform" id="filter-arrow">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </div>
-        <div class="filter-content mt-4" id="filter-content">
-          <div class="flex flex-col lg:flex-row gap-3 lg:gap-4 items-stretch lg:items-end">
-            <div class="flex-1">
-              <label class="block text-sm mb-2 text-gray-300">Search (event/program)</label>
-              <input id="search-input" class="w-full input-field rounded-lg p-3" placeholder="Search by name...">
-            </div>
-            <div class="flex-1 lg:flex-none lg:w-32">
-              <label class="block text-sm mb-2 text-gray-300">Department</label>
-              <select id="filter-dept" class="w-full input-field rounded-lg p-3">
-                <option value="">All</option>
-                <option>CSE</option><option>ECE</option><option>EEE</option><option>IT</option><option>ME</option><option>ALL</option>
-              </select>
-            </div>
-            <div class="flex-1 lg:flex-none lg:w-32">
-              <label class="block text-sm mb-2 text-gray-300">Semester</label>
-              <select id="filter-sem" class="w-full input-field rounded-lg p-3">
-                <option value="">All</option>
-                <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
-              </select>
-            </div>
-            <div class="flex-1 lg:flex-none lg:w-32">
-              <label class="block text-sm mb-2 text-gray-300">Type</label>
-              <select id="filter-type" class="w-full input-field rounded-lg p-3">
-                <option value="">All</option>
-                <option value="upcoming">Upcoming</option>
-                <option value="present">Present</option>
-                <option value="past">Past</option>
-              </select>
-            </div>
-            <button id="filter-btn" class="btn-green px-6 py-3 rounded-lg font-medium">Apply Filters</button>
-          </div>
-        </div>
-      </div>
-    </section>
+  <!-- Login Section -->
+  <div id="loginSection" class="section">
+    <h2>Login</h2>
+    <input id="loginId" placeholder="ID">
+    <input id="loginPass" type="password" placeholder="Password">
+    <select id="loginRole">
+      <option value="admin">Admin</option>
+      <option value="owner">Owner</option>
+    </select>
+    <button onclick="login()">Login</button>
+  </div>
 
-    <!-- HOME SECTIONS -->
-    <section id="home-sections" class="space-y-8 lg:space-y-10"></section>
+  <!-- Logout Button -->
+  <div id="logoutSection" class="section hidden">
+    <p>Welcome, <span id="userRole"></span> (<span id="userId"></span>)</p>
+    <button onclick="logout()">Logout</button>
+  </div>
 
-    <!-- MY REGISTRATIONS -->
-    <section id="myregs-section" class="hidden">
-      <div class="glass rounded-xl p-4 lg:p-6">
-        <h2 class="text-2xl font-bold mb-4 lg:mb-6">My Registrations</h2>
-        <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end mb-4 lg:mb-6">
-          <div class="flex-1">
-            <label class="block text-sm mb-2 text-gray-300">Roll No</label>
-            <input id="myregs-roll" class="w-full input-field rounded-lg p-3" placeholder="Enter your Roll No">
-          </div>
-          <button id="myregs-btn" class="btn-green px-6 py-3 rounded-lg font-medium">Fetch</button>
-          <button id="myregs-print" class="btn px-4 py-3 rounded-lg">Print / Save PDF</button>
-        </div>
-        <div id="myregs-list" class="grid gap-4 lg:grid-cols-2"></div>
-      </div>
-    </section>
+  <!-- Public Events Section -->
+  <div id="eventsSection" class="section">
+    <h2>Events</h2>
+    <div id="eventsList"></div>
+  </div>
 
-    <!-- LOGIN / DASHBOARD -->
-    <section id="login-section" class="hidden">
-      <div class="grid lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-1 glass rounded-xl p-4 lg:p-6">
-          <h2 class="text-xl font-bold mb-4">Login</h2>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm mb-2 text-gray-300">Role</label>
-              <select id="login-role" class="w-full input-field rounded-lg p-3">
-                <option value="admin">Admin</option>
-                <option value="owner">Owner</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm mb-2 text-gray-300">ID</label>
-              <input id="login-id" class="w-full input-field rounded-lg p-3">
-            </div>
-            <div>
-              <label class="block text-sm mb-2 text-gray-300">Password</label>
-              <input id="login-pw" type="password" class="w-full input-field rounded-lg p-3">
-            </div>
-            <button id="login-btn" class="btn-green w-full py-3 rounded-lg font-medium">Login</button>
-            <p id="login-msg" class="text-sm error-text"></p>
-          </div>
-        </div>
-        <div class="lg:col-span-2 glass rounded-xl p-4 lg:p-6">
-          <div class="flex items-center justify-between mb-4 lg:mb-6">
-            <h2 class="text-xl font-bold">Dashboard</h2>
-            <div class="flex gap-2 items-center">
-              <span id="user-badge" class="text-sm badge px-3 py-1 rounded-lg"></span>
-              <button id="logout-btn" class="btn px-4 py-2 rounded-lg">Logout</button>
-            </div>
-          </div>
-          <div class="grid gap-4 lg:gap-6">
-            <div class="grid md:grid-cols-2 gap-4 lg:gap-6">
-              <div class="glass rounded-xl p-4">
-                <h3 class="font-semibold mb-3" style="color: var(--primary-green)">Events</h3>
-                <div class="flex flex-wrap gap-2 mb-3">
-                  <button id="ev-refresh" class="btn px-3 py-2 rounded-lg text-sm">Refresh</button>
-                  <button id="ev-new" class="btn-green px-3 py-2 rounded-lg text-sm">New Event</button>
-                </div>
-                <div id="ev-list" class="space-y-2 max-h-80 overflow-auto"></div>
-              </div>
-              <div class="glass rounded-xl p-4">
-                <h3 class="font-semibold mb-3" style="color: var(--primary-green)">Programs (selected event)</h3>
-                <div class="flex flex-wrap gap-2 mb-3">
-                  <button id="prg-refresh" class="btn px-3 py-2 rounded-lg text-sm">Refresh</button>
-                  <button id="prg-new" class="btn-green px-3 py-2 rounded-lg text-sm">New Program</button>
-                </div>
-                <div id="prg-list" class="space-y-2 max-h-80 overflow-auto"></div>
-              </div>
-            </div>
-            <div class="glass rounded-xl p-4">
-              <h3 class="font-semibold mb-3" style="color: var(--primary-green)">Registrations</h3>
-              <button id="reg-refresh" class="btn px-3 py-2 rounded-lg text-sm mb-3">Refresh</button>
-              <div id="reg-list" class="space-y-2 max-h-80 overflow-auto"></div>
-            </div>
-            <div id="owner-panel" class="glass rounded-xl p-4 hidden">
-              <h3 class="font-semibold mb-3" style="color: var(--primary-green)">Owner: Manage Admins</h3>
-              <div class="flex flex-col sm:flex-row gap-2 mb-3">
-                <input id="new-admin-id" placeholder="Admin ID" class="input-field rounded-lg p-2 flex-1">
-                <input id="new-admin-pw" placeholder="Password" class="input-field rounded-lg p-2 flex-1">
-                <button id="admin-create" class="btn-green px-4 py-2 rounded-lg">Create</button>
-              </div>
-              <div id="admins-list" class="space-y-2"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+  <!-- Admin Panel -->
+  <div id="adminPanel" class="section hidden">
+    <h2>Admin Panel</h2>
+    <button onclick="loadAdminEvents()">Manage Events</button>
+    <button onclick="loadRegistrations()">Manage Registrations</button>
+    <div id="adminContent"></div>
+  </div>
 
-  </main>
-
-  <!-- Register Modal -->
-  <div id="reg-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center p-4 z-50">
-    <div class="glass rounded-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-      <h3 class="text-xl font-bold mb-4">Register for Program</h3>
-      <div class="space-y-4">
-        <input id="reg-name" class="w-full input-field rounded-lg p-3" placeholder="Name">
-        <input id="reg-roll" class="w-full input-field rounded-lg p-3" placeholder="Roll No">
-        <div>
-          <label class="block text-sm mb-2 text-gray-300">Semester (1-6)</label>
-          <select id="reg-sem" class="w-full input-field rounded-lg p-3">
-            <option value="">Select</option>
-            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm mb-2 text-gray-300">Department</label>
-          <input id="reg-dept" class="w-full input-field rounded-lg p-3" placeholder="e.g., CSE">
-        </div>
-        <p id="reg-msg" class="text-sm"></p>
-      </div>
-      <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
-        <button id="reg-cancel" class="btn px-6 py-3 rounded-lg">Cancel</button>
-        <button id="reg-submit" class="btn-green px-6 py-3 rounded-lg font-medium">Submit</button>
-      </div>
-    </div>
+  <!-- Owner Panel -->
+  <div id="ownerPanel" class="section hidden">
+    <h2>Owner Panel</h2>
+    <button onclick="manageAdmins()">Manage Admins</button>
+    <div id="ownerContent"></div>
   </div>
 
   <script src="app.js"></script>
