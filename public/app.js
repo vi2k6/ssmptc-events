@@ -525,6 +525,9 @@ $("#prg-new").addEventListener('click', async ()=>{
 $("#reg-refresh").addEventListener('click', refreshRegs);
 $("#admin-create").addEventListener('click', ownerCreateAdmin);
 
+// Footer click to open login
+$("#footer-text").addEventListener('click', ()=> show('login'));
+
 // Initialize
 show('home');
 loadHome();
