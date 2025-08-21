@@ -163,7 +163,13 @@
               <label class="block text-sm mb-2 text-gray-300">Department</label>
               <select id="filter-dept" class="w-full input-field rounded-lg p-3">
                 <option value="">All</option>
-                <option>CSE</option><option>ECE</option><option>EEE</option><option>IT</option><option>ME</option><option>ALL</option>
+                <option value="CIVIL">Civil Engineering</option>
+                <option value="MECH">Mechanical Engineering</option>
+                <option value="AUTO">Automobile Engineering</option>
+                <option value="ECE">Electronics Engineering</option>
+                <option value="EEE">Electrical & Electronics Engineering</option>
+                <option value="CSE">Computer Engineering</option>
+                <option value="ALL">All Departments</option>
               </select>
             </div>
             <div class="flex-1 lg:flex-none lg:w-36">
@@ -307,7 +313,15 @@
         </div>
         <div>
           <label class="block text-sm mb-2 text-gray-300">Department</label>
-          <input id="reg-dept" class="w-full input-field rounded-lg p-3" placeholder="e.g., CSE">
+          <select id="reg-dept" class="w-full input-field rounded-lg p-3">
+            <option value="">Select Department</option>
+            <option value="CIVIL">Civil Engineering</option>
+            <option value="MECH">Mechanical Engineering</option>
+            <option value="AUTO">Automobile Engineering</option>
+            <option value="ECE">Electronics Engineering</option>
+            <option value="EEE">Electrical & Electronics Engineering</option>
+            <option value="CSE">Computer Engineering</option>
+          </select>
         </div>
         <p id="reg-msg" class="text-sm"></p>
       </div>

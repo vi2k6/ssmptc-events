@@ -10,8 +10,7 @@
     "departments": [
       "CSE",
       "ECE",
-      "EEE",
-      "IT"
+      "EEE"
     ],
     "time": "2025-09-11T09:00:00.000Z"
   },
@@ -26,7 +25,7 @@
     "departments": [
       "ECE",
       "EEE",
-      "ME"
+      "MECH"
     ],
     "time": "2025-09-12T10:00:00.000Z"
   },
@@ -42,5 +41,32 @@
       "ALL"
     ],
     "time": "2025-08-18T09:00:00.000Z"
+  },
+  {
+    "id": "prg4",
+    "eventId": "evt1",
+    "title": "Automobile Workshop",
+    "description": "Hands-on automobile engineering workshop.",
+    "type": "individual",
+    "regStart": "2025-08-15T00:00:00.000Z",
+    "regEnd": "2025-09-05T23:59:59.000Z",
+    "departments": [
+      "AUTO",
+      "MECH"
+    ],
+    "time": "2025-09-10T14:00:00.000Z"
+  },
+  {
+    "id": "prg5",
+    "eventId": "evt2",
+    "title": "Civil Engineering Design Challenge",
+    "description": "Structural design competition.",
+    "type": "group",
+    "regStart": "2025-07-20T00:00:00.000Z",
+    "regEnd": "2025-08-15T23:59:59.000Z",
+    "departments": [
+      "CIVIL"
+    ],
+    "time": "2025-08-17T11:00:00.000Z"
   }
 ]

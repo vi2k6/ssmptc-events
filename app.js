@@ -196,7 +196,7 @@ async function submitRegister(){
     name: $("#reg-name").value.trim(),
     rollNo: $("#reg-roll").value.trim(),
     semester: $("#reg-sem").value,
-    department: $("#reg-dept").value.trim().toUpperCase()
+    department: $("#reg-dept").value
   };
   if(!payload.name || !payload.rollNo || !payload.semester || !payload.department){
     $("#reg-msg").textContent = 'Please fill all fields.';
@@ -373,7 +373,8 @@ async function refreshPrograms(){
         const type = prompt('Type (individual|group)', p.type) || p.type;
         const regStart = prompt('Reg Start ISO', p.regStart) || p.regStart;
         const regEnd = prompt('Reg End ISO', p.regEnd) || p.regEnd;
-        const departments = (prompt('Departments (comma separated)', p.departments.join(',')) || p.departments.join(',')).split(',').map(s=> s.trim());
+        const deptInput = prompt('Departments (CIVIL,MECH,AUTO,ECE,EEE,CSE or ALL)', p.departments.join(',')) || p.departments.join(',');
+        const departments = deptInput === 'ALL' ? ['ALL'] : deptInput.split(',').map(s=> s.trim().toUpperCase());
         const time = prompt('Program Time ISO', p.time) || p.time;
         const res2 = await fetch('/api/admin/programs/'+p.id, { method:'PUT', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({title, description, type, regStart, regEnd, departments, time}) });
         if(!res2.ok) showError('#prg-list', 'Update failed'); else refreshPrograms();
@@ -394,37 +395,79 @@ async function refreshRegs(){
   try {
     const res = await fetch('/api/admin/registrations', { headers:{Authorization:'Bearer '+token} });
     const regs = await res.json();
-    const list = $("#reg-list"); list.innerHTML='';
-    regs.forEach(r=>{
-      const item = document.createElement('div');
-      item.className = 'glass rounded-lg p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-2';
-      item.innerHTML = `
-        <div class="text-sm flex-1">
-          <div><span class="font-medium">${r.name}</span> (${r.rollNo}) — Sem ${r.semester}, Dept ${r.department}</div>
-          <div class="text-xs text-gray-400">Program ${r.programId} | ${new Date(r.createdAt).toLocaleString()}</div>
-        </div>
-        <div class="flex gap-2 flex-wrap">
-          <button class="btn px-3 py-1 rounded text-xs" data-act="edit">Edit</button>
-          <button class="btn px-3 py-1 rounded text-xs" data-act="del">Delete</button>
-        </div>
-      `;
-      item.querySelector('[data-act="edit"]').addEventListener('click', async ()=>{
-        const name = prompt('Name', r.name) || r.name;
-        const department = prompt('Department', r.department) || r.department;
-        const semester = prompt('Semester (1-6)', r.semester) || r.semester;
-        const res2 = await fetch('/api/admin/registrations/'+r.id, { method:'PUT', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({name, department, semester}) });
-        if(!res2.ok) showError('#reg-list', 'Update failed'); else refreshRegs();
-      });
-      item.querySelector('[data-act="del"]').addEventListener('click', async ()=>{
-        if(!confirm('Delete registration?')) return;
-        const res2 = await fetch('/api/admin/registrations/'+r.id, { method:'DELETE', headers:{Authorization:'Bearer '+token} });
-        if(!res2.ok) showError('#reg-list', 'Delete failed'); else refreshRegs();
-      });
-      list.appendChild(item);
+    
+    // Group registrations by department
+    const deptGroups = {};
+    regs.forEach(r => {
+      if (!deptGroups[r.department]) {
+        deptGroups[r.department] = [];
+      }
+      deptGroups[r.department].push(r);
     });
+    
+    const list = $("#reg-list"); list.innerHTML='';
+    
+    // Create department sections
+    Object.keys(deptGroups).sort().forEach(dept => {
+      const deptSection = document.createElement('div');
+      deptSection.className = 'mb-6';
+      
+      const deptName = getDepartmentName(dept);
+      deptSection.innerHTML = `
+        <h4 class="text-lg font-semibold mb-3 text-green-400">${deptName} (${deptGroups[dept].length} students)</h4>
+        <div class="space-y-2" id="dept-${dept}"></div>
+      `;
+      
+      const deptContainer = deptSection.querySelector(`#dept-${dept}`);
+      deptGroups[dept].forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'glass rounded-lg p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-2';
+        item.innerHTML = `
+          <div class="text-sm flex-1">
+            <div><span class="font-medium">${r.name}</span> (${r.rollNo}) — Semester ${r.semester}</div>
+            <div class="text-xs text-gray-400">Program ${r.programId} | ${new Date(r.createdAt).toLocaleString()}</div>
+          </div>
+          <div class="flex gap-2 flex-wrap">
+            <button class="btn px-3 py-1 rounded text-xs" data-act="edit">Edit</button>
+            <button class="btn px-3 py-1 rounded text-xs" data-act="del">Delete</button>
+          </div>
+        `;
+        item.querySelector('[data-act="edit"]').addEventListener('click', async ()=>{
+          const name = prompt('Name', r.name) || r.name;
+          const department = prompt('Department', r.department) || r.department;
+          const semester = prompt('Semester (1-6)', r.semester) || r.semester;
+          const res2 = await fetch('/api/admin/registrations/'+r.id, { method:'PUT', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({name, department, semester}) });
+          if(!res2.ok) showError('#reg-list', 'Update failed'); else refreshRegs();
+        });
+        item.querySelector('[data-act="del"]').addEventListener('click', async ()=>{
+          if(!confirm('Delete registration?')) return;
+          const res2 = await fetch('/api/admin/registrations/'+r.id, { method:'DELETE', headers:{Authorization:'Bearer '+token} });
+          if(!res2.ok) showError('#reg-list', 'Delete failed'); else refreshRegs();
+        });
+        deptContainer.appendChild(item);
+      });
+      
+      list.appendChild(deptSection);
+    });
+    
+    if (Object.keys(deptGroups).length === 0) {
+      list.innerHTML = '<p class="text-gray-300 text-center py-8">No registrations found</p>';
+    }
   } catch (error) {
     showError('#reg-list', 'Failed to load registrations');
   }
+}
+
+function getDepartmentName(code) {
+  const deptNames = {
+    'CIVIL': 'Civil Engineering',
+    'MECH': 'Mechanical Engineering', 
+    'AUTO': 'Automobile Engineering',
+    'ECE': 'Electronics Engineering',
+    'EEE': 'Electrical & Electronics Engineering',
+    'CSE': 'Computer Engineering'
+  };
+  return deptNames[code] || code;
 }
 
 // Owner admin management
@@ -516,7 +559,8 @@ $("#prg-new").addEventListener('click', async ()=>{
   const type = prompt('Type (individual|group)', 'individual') || 'individual';
   const regStart = prompt('Reg Start ISO');
   const regEnd = prompt('Reg End ISO');
-  const departments = (prompt('Departments (comma, or ALL)', 'ALL')||'ALL').split(',').map(s=> s.trim());
+  const deptInput = prompt('Departments (CIVIL,MECH,AUTO,ECE,EEE,CSE or ALL)', 'ALL') || 'ALL';
+  const departments = deptInput === 'ALL' ? ['ALL'] : deptInput.split(',').map(s=> s.trim().toUpperCase());
   const time = prompt('Program Time ISO');
   const res = await fetch(`/api/admin/events/${selectedEventId}/programs`, { method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+token}, body: JSON.stringify({title, description, type, regStart, regEnd, departments, time}) });
   if(!res.ok){ showError('#prg-list', 'Create failed'); return; }
